@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     # rest framework
     'rest_framework',
     'rest_framework.authtoken',
+    'corsheaders',  # new
 ]
 
 MIDDLEWARE = [
@@ -31,6 +32,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # new
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -83,3 +85,11 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ),
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",   # Vite dev server default
+    "http://localhost:3000",   # if you use another dev server
+]
+
+# or for quick dev
+# CORS_ALLOW_ALL_ORIGINS = True
