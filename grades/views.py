@@ -31,10 +31,7 @@ class SubjectViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['delete'], url_path=r'students/(?P<student_id>[^/.]+)', permission_classes=[permissions.IsAdminUser])
     def remove_student(self, request, pk=None, student_id=None):
-        """
-        Admin-only: remove a student from this subject by student id, only if the enrollment is not graded.
-        URL: DELETE /api/subjects/{subject_id}/students/{student_id}/
-        """
+   
         # get subject (self.get_object will raise 404 if not found)
         subject = self.get_object()
 
