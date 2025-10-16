@@ -192,7 +192,24 @@ export default function CRUD() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 6 }}>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          // layered background: gradient overlay + image
+          backgroundImage:
+            mode === "dark"
+              ? `linear-gradient(rgba(7,18,38,0.72), rgba(7,18,38,0.60)), url('https://i.ytimg.com/vi/2KltPcZv6RM/maxresdefault.jpg')`
+              : `linear-gradient(rgba(255,255,255,0.62), rgba(246,248,250,0.62)), url('https://i.ytimg.com/vi/2KltPcZv6RM/maxresdefault.jpg')`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          // 'fixed' produces the parallax-like effect; remove if you want normal scrolling
+          backgroundAttachment: "fixed",
+          // fallback background color (kept for browsers that don't support bg image)
+          bgcolor: mode === "dark" ? "#071226" : "#f6f8fa",
+          pb: 6,
+        }}
+      >
         <AppBar position="static" color="transparent" sx={{ bgcolor: "transparent" }}>
           <Toolbar sx={{ justifyContent: "space-between" }}>
             <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
@@ -264,7 +281,7 @@ export default function CRUD() {
             </Grid>
           </Paper>
 
-          <Box sx={{ mt: 3 }}>
+          <Box sx={{ mt: 3 }}>  
             <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
               Subject List ({subjects.length})
             </Typography>
