@@ -41,38 +41,47 @@ type Subject = {
   name: string;
 };
 
-const STORAGE_TOKEN_KEY = "apiToken";
-const API_BASE = (import.meta.env?.VITE_API_BASE as string) || "http://127.0.0.1:8000";
+const STORAGE_TOKEN_KEY = "apiToken"; // localStorage key for token
+const API_BASE = (import.meta.env?.VITE_API_BASE as string) || "http://127.0.0.1:8000"; // base URL for fetch
 
+// uses fetch; adds Accept/Content-Type and Authorization if token given
 async function apiFetch(path: string, opts: RequestInit = {}, token?: string) {
   const headers: HeadersInit = {
     Accept: "application/json",
     ...(opts.headers || {}),
   };
-  if (token) headers["Authorization"] = `Token ${token}`;
+  if (token) headers["Authorization"] = `Token ${token}`; // adds token header
   if (opts.body && !(opts.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
   }
-  const res = await fetch(`${API_BASE}${path}`, { ...opts, headers, credentials: "omit" });
+  const res = await fetch(`${API_BASE}${path}`, { ...opts, headers, credentials: "omit" }); // native fetch
   return res;
 }
 
+// Main CRUD component
 export default function CRUD() {
+  // state: list of subjects from API
   const [subjects, setSubjects] = useState<Subject[]>([]);
+  // state: controlled input for new subject name
   const [name, setName] = useState("");
-  const [snack, setSnack] = useState<{ open: boolean; message?: string; severity?: "success" | "info" | "error" }>({
+  // state: snackbar status/message
+  const [snack, setSnack] = useState<{ open: boolean; message?: string; severity?: "success" | "info" | "error" }>( {
     open: false,
   });
+  // state: id waiting for delete confirmation
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
-  // Theme
+  // MUI hook: detect system dark mode
   const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
+  // state: UI theme mode
   const [mode, setMode] = useState<"light" | "dark">("light");
+  // set initial theme from system preference (runs once)
   useEffect(() => {
     if (prefersDark) setMode("dark");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
+  // memoized MUI theme so it doesn't recreate every render
   const theme = useMemo(
     () =>
       createTheme({
@@ -82,26 +91,25 @@ export default function CRUD() {
     [mode]
   );
 
-  // Auth: load token
+  // state: auth token (loaded from localStorage lazily)
   const [token, setToken] = useState<string | null>(() => {
     try {
-      return localStorage.getItem(STORAGE_TOKEN_KEY);
+      return localStorage.getItem(STORAGE_TOKEN_KEY); // read localStorage
     } catch {
       return null;
     }
   });
 
-  // When token changes (sign in/out), fetch subjects
+  // hook: reload subjects when token changes (login/logout)
   useEffect(() => {
     fetchSubjects();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
-
+  // Load subjects from the API (GET)
   const fetchSubjects = async () => {
     try {
       const res = await apiFetch("/api/subjects/", { method: "GET" }, token || undefined);
       if (res.status === 401) {
-        setSubjects([]);
+        setSubjects([]); // not authorized, clear
         return;
       }
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`);
@@ -112,6 +120,7 @@ export default function CRUD() {
     }
   };
 
+  // Create a new subject (POSTMALONE)
   const addSubject = async () => {
     const trimmed = name.trim();
     if (!trimmed) {
@@ -133,7 +142,7 @@ export default function CRUD() {
       }
       if (!res.ok) throw new Error(`Add failed: ${res.status}`);
       const created = await res.json();
-      setSubjects((s) => [created, ...s]);
+      setSubjects((s) => [created, ...s]); // add to front of list
       setName("");
       setSnack({ open: true, message: "Subject added", severity: "success" });
     } catch (err) {
@@ -141,6 +150,7 @@ export default function CRUD() {
     }
   };
 
+  // Delete subject (DELETE)
   const doDelete = async () => {
     if (!confirmDeleteId) return;
     const id = confirmDeleteId;
@@ -165,9 +175,10 @@ export default function CRUD() {
     }
   };
 
+  // called after login: save token and update state
   const onLogin = (t: string) => {
     try {
-      localStorage.setItem(STORAGE_TOKEN_KEY, t);
+      localStorage.setItem(STORAGE_TOKEN_KEY, t); // persist token
     } catch {
       // ignore
     }
@@ -175,6 +186,7 @@ export default function CRUD() {
     setSnack({ open: true, message: "Signed in", severity: "success" });
   };
 
+  // sign out: clear token
   const logout = () => {
     try {
       localStorage.removeItem(STORAGE_TOKEN_KEY);
@@ -183,7 +195,7 @@ export default function CRUD() {
     setSnack({ open: true, message: "Signed out", severity: "info" });
   };
 
-  // If not signed in, show the separate Login page (full page)
+  // if no token, show Login component
   if (!token) {
     return <Login onLogin={onLogin} onCancel={() => { /* no-op */ }} />;
   }
@@ -234,7 +246,7 @@ export default function CRUD() {
               </Button>
 
               <IconButton
-                onClick={() => setMode((m) => (m === "light" ? "dark" : "light"))}
+                onClick={() => setMode((m) => (m === "light" ? "dark" : "light"))} // toggles theme mode
                 color="inherit"
                 aria-label="toggle theme"
                 sx={{ ml: 1 }}
@@ -255,7 +267,7 @@ export default function CRUD() {
               <Grid item xs={12} md={6}>
                 <TextField
                   label="Subject name"
-                  value={name}
+                  value={name} // controlled input tied to `name` state
                   onChange={(e) => setName(e.target.value)}
                   fullWidth
                   required
@@ -272,7 +284,7 @@ export default function CRUD() {
                 <Button
                   variant="outlined"
                   onClick={() => {
-                    setName("");
+                    setName(""); // reset input
                   }}
                 >
                   Reset
@@ -281,7 +293,7 @@ export default function CRUD() {
             </Grid>
           </Paper>
 
-          <Box sx={{ mt: 3 }}>  
+          <Box sx={{ mt: 3 }}>
             <Typography variant="h6" sx={{ mb: 1, fontWeight: 700 }}>
               Subject List ({subjects.length})
             </Typography>

@@ -25,30 +25,36 @@ type Props = {
 
 const theme = createTheme();
 
+// Login component (function) with shorter, junior-style comments
 export default function Login({ onLogin, onCancel }: Props) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // detect prefers-color-scheme to select overlay
+  // prefers dark theme
   const prefersDark = useMediaQuery("(prefers-color-scheme: dark)");
   const mode = prefersDark ? "dark" : "light";
 
+  // handle sign-in
   const doLogin = async () => {
     setError(null);
+    // quick validation
     if (!username.trim() || !password) {
       setError("Please enter username and password.");
       return;
     }
+
     setLoading(true);
     try {
+      // call API
       const res = await fetch(`${API_BASE}/api-token-auth/`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify({ username: username.trim(), password }),
       });
 
+      // API error -> show message
       if (!res.ok) {
         const body = await res.json().catch(() => null);
         setError(body?.non_field_errors?.[0] || "Login failed (check credentials)");
@@ -57,17 +63,20 @@ export default function Login({ onLogin, onCancel }: Props) {
       }
 
       const data = await res.json();
+      // ensure token present
       if (!data.token) {
         setError("Login response missing token");
         setLoading(false);
         return;
       }
 
+      // try save token locally
       try {
         localStorage.setItem(STORAGE_TOKEN_KEY, data.token);
       } catch {
-        // ignore storage error but still proceed
+        // ignore storage errors
       }
+      // inform parent
       onLogin(data.token);
     } catch (err) {
       setError(`Network error: ${(err as Error).message}`);
@@ -82,7 +91,7 @@ export default function Login({ onLogin, onCancel }: Props) {
       <Box
         sx={{
           minHeight: "100vh",
-          // layered background: gradient overlay + image (same as CRUD)
+          // background overlay
           backgroundImage:
             mode === "dark"
               ? `linear-gradient(rgba(7,18,38,0.72), rgba(7,18,38,0.60)), url('https://i.ytimg.com/vi/2KltPcZv6RM/maxresdefault.jpg')`
@@ -144,7 +153,7 @@ export default function Login({ onLogin, onCancel }: Props) {
                 </Box>
 
                 <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 2 }}>
-                  If you prefer you can get a token from Django shell or Admin and it will be stored in localStorage as
+                  The tokens are stored in the django admin panel my g
                   <code> {STORAGE_TOKEN_KEY}</code>.
                 </Typography>
               </Box>
