@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import CRUD from "./CRUD";
+import CRUD from "./CRUD";  
 
 
 createRoot(document.getElementById("root")!).render(
