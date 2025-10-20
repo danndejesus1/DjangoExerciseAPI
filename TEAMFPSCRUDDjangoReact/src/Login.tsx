@@ -112,7 +112,7 @@ export default function Login({ onLogin, onCancel }: Props) {
             p: { xs: 3, sm: 4 },
             // translucent backdrop so wallpaper remains visible
             backgroundColor: mode === "dark" ? "rgba(255, 255, 255, 0.64)" : "rgba(255,255,255,0.72)",
-            color: mode === "dark" ? "rgba(255,255,255,0.92)" : "rgba(0,0,0,0.87)",
+            color: mode === "dark" ? "rgba(32, 32, 32, 0.64)" : "rgba(0,0,0,0.87)",
             boxShadow: mode === "dark" ? "0 10px 30px rgba(255, 255, 255, 0.26)" : "0 8px 24px rgba(16,24,40,0.12)",
             backdropFilter: "blur(6px) saturate(120%)",
             display: "flex",
